@@ -26,9 +26,14 @@ def main() -> int:
     text = LINE
     # Gate self-checks: the sealed scorer needs UTF-8 text of 1-140
     # characters, not only white space, and the brief needs a single line.
+    # A trailing space or a control character would waste the line's
+    # punch and risk the gate, so reject those too.
     assert text.strip(), "empty line"
     assert 1 <= len(text) <= 140, "length %d outside 1-140" % len(text)
     assert "\n" not in text, "line must be a single line"
+    assert text == text.strip(), "line has leading/trailing whitespace"
+    assert all(ord(ch) >= 32 or ch in "\t" for ch in text), \
+        "line has control characters"
     data = text.encode("utf-8")
     with open(target, "wb") as f:
         f.write(data)
